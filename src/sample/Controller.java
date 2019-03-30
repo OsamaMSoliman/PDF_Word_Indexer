@@ -2,12 +2,14 @@ package sample;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.*;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 
@@ -31,6 +33,7 @@ public class Controller implements Initializable, Signal {
     public TableColumn<Word.WordModel, Integer> WordPdfIdColumn;
     public TableColumn<Word.WordModel, Integer> WordPdfPageColumn;
     private final ObservableList<Word.WordModel> WordsList = FXCollections.observableArrayList();
+    public TextField searchTextField;
 
 
     @FXML
@@ -86,6 +89,18 @@ public class Controller implements Initializable, Signal {
         for (int i = 0; i < checkBoxs.length; i++)
             progressIndicators[i].disableProperty().bind(checkBoxs[i].selectedProperty().not());
         Main.LoadDB(PDFsList, WordsList);
+
+
+        FilteredList<Word.WordModel> filteredList = new FilteredList<>(WordsList, e -> true);
+//        searchTextField.setOnKeyReleased(e -> {
+        searchTextField.textProperty().addListener(
+                (observable, oldValue, newValue) -> filteredList.setPredicate(
+                        wordModel -> newValue == null || newValue.isEmpty() ||
+                                wordModel.Value.getValue().toLowerCase().contains(newValue.toLowerCase())));
+//            SortedList<Word.WordModel> sortedList = new SortedList<>(filteredList);
+//            sortedList.comparatorProperty().bind(WordTableView.comparatorProperty());
+        WordTableView.setItems(filteredList);
+//        });
     }
 
     public void runBtnClicked(MouseEvent mouseEvent) {
